@@ -12,6 +12,7 @@ const compat = new FlatCompat({
 const eslintConfig = [
   ...compat.config({
     extends: [
+      "next",
       "next/core-web-vitals",
       "next/typescript",
       "prettier",
@@ -31,6 +32,7 @@ const eslintConfig = [
       "n/no-process-env": "error",
       "n/no-unsupported-features/node-builtins": "off",
     },
+    ignorePatterns: [".next/", "node_modules/"],
   }),
 ]
 
