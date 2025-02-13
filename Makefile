@@ -17,5 +17,4 @@ db/migrate:
 	DB_MIGRATING=true npx drizzle-kit migrate
 
 db/generate:
-	@echo Run the following command with a given name:
-	@echo npx drizzle-kit generate --name=init
+	npx drizzle-kit generate
