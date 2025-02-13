@@ -33,8 +33,8 @@ function AuthForms() {
           </div>
           <div
             className={cn(
-              "border-t border-t-gray-200 pl-11 pt-10 lg:border-l lg:border-t-0",
-              "lg:border-l-gray-200 lg:pt-0"
+              "border-t border-t-gray-200 pt-10 lg:border-l lg:border-t-0",
+              "lg:border-l-gray-200 lg:pl-11 lg:pt-0"
             )}
           >
             <h3 className="font-medium">Sign up</h3>

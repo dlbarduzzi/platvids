@@ -3,6 +3,7 @@
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { ArrowRight, CircleHelp } from "lucide-react"
 
 import {
   FormControl,
@@ -16,10 +17,64 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
-const signUpSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8).max(72),
-})
+const PASSWORD_MIN_CHARS = 8
+const PASSWORD_MAX_CHARS = 72
+
+function passwordHasNumber(value: string) {
+  return /[0-9]/.test(value)
+}
+
+function passwordHasSpecialChar(value: string) {
+  return /[!?@#$&^*_\-=+]/.test(value)
+}
+
+function passwordHasLowercaseLetter(value: string) {
+  return /[a-z]/.test(value)
+}
+
+function passwordHasUppercaseLetter(value: string) {
+  return /[A-Z]/.test(value)
+}
+
+const signUpSchema = z
+  .object({
+    email: z.string().min(1, "Email is required").email("Not a valid email"),
+    password: z
+      .string()
+      .min(1, "Password is required")
+      .min(PASSWORD_MIN_CHARS, {
+        message: `Password must be at least ${PASSWORD_MIN_CHARS} characters long`,
+      })
+      .max(PASSWORD_MAX_CHARS, {
+        message: `Password must be at most ${PASSWORD_MAX_CHARS} characters long`,
+      }),
+  })
+  .superRefine((input, ctx) => {
+    const passwordCheck = { isValid: true, message: "" }
+    if (passwordCheck.isValid && !passwordHasNumber(input.password)) {
+      passwordCheck.isValid = false
+      passwordCheck.message = "Password must contain at least 1 number"
+    }
+    if (passwordCheck.isValid && !passwordHasLowercaseLetter(input.password)) {
+      passwordCheck.isValid = false
+      passwordCheck.message = "Password must contain at least 1 lowercase character"
+    }
+    if (passwordCheck.isValid && !passwordHasUppercaseLetter(input.password)) {
+      passwordCheck.isValid = false
+      passwordCheck.message = "Password must contain at least 1 uppercase character"
+    }
+    if (passwordCheck.isValid && !passwordHasSpecialChar(input.password)) {
+      passwordCheck.isValid = false
+      passwordCheck.message = "Password must contain at least 1 special character"
+    }
+    if (!passwordCheck.isValid) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["password"],
+        message: passwordCheck.message,
+      })
+    }
+  })
 
 type SignUpSchema = z.infer<typeof signUpSchema>
 
@@ -47,7 +102,9 @@ export function SignUpForm() {
             control={form.control}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <div className="pb-1.5">
+                  <FormLabel>Email</FormLabel>
+                </div>
                 <FormControl>
                   <Input
                     {...field}
@@ -66,13 +123,17 @@ export function SignUpForm() {
             control={form.control}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Password</FormLabel>
+                <div className="flex items-center justify-between gap-x-2 pb-1.5 pr-1">
+                  <FormLabel>Password</FormLabel>
+                  <CircleHelp className="size-4 text-gray-500" />
+                </div>
                 <FormControl>
                   <Input
                     {...field}
                     type="password"
-                    placeholder=""
-                    variant={!!errors.email ? "danger" : "default"}
+                    className="placeholder:text-xs placeholder:text-gray-300"
+                    placeholder="● ● ● ● ● ● ● ●"
+                    variant={!!errors.password ? "danger" : "default"}
                     disabled={isSubmitting}
                   />
                 </FormControl>
@@ -80,7 +141,15 @@ export function SignUpForm() {
               </FormItem>
             )}
           />
-          <Button type="submit">Sing up</Button>
+          <Button type="submit" className="h-12 text-left">
+            <span className="flex-1">Create an account</span>
+            <ArrowRight className="size-5" />
+          </Button>
+          <div>
+            <Button type="button" onClick={() => form.reset()}>
+              Reset form
+            </Button>
+          </div>
         </div>
       </form>
     </FormProvider>

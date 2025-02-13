@@ -85,14 +85,7 @@ const FormLabel = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof RadixLabel.Root>
 >(({ className, ...props }, ref) => {
   const { formItemId } = useFormField()
-  return (
-    <Label
-      ref={ref}
-      className={cn("block pb-2", className)}
-      htmlFor={formItemId}
-      {...props}
-    />
-  )
+  return <Label ref={ref} className={cn(className)} htmlFor={formItemId} {...props} />
 })
 
 FormLabel.displayName = "FormLabel"

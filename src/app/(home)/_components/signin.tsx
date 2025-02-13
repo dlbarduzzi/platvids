@@ -2,6 +2,7 @@
 
 import { z } from "zod"
 import { useForm } from "react-hook-form"
+import { ArrowRight } from "lucide-react"
 import { zodResolver } from "@hookform/resolvers/zod"
 
 import {
@@ -17,8 +18,8 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
 const signInSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8).max(72),
+  email: z.string().email("Invalid email"),
+  password: z.string().min(1, { message: "Password is required" }),
 })
 
 type SignInSchema = z.infer<typeof signInSchema>
@@ -47,7 +48,9 @@ export function SignInForm() {
             control={form.control}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <div className="pb-1.5">
+                  <FormLabel>Email</FormLabel>
+                </div>
                 <FormControl>
                   <Input
                     {...field}
@@ -66,13 +69,16 @@ export function SignInForm() {
             control={form.control}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Password</FormLabel>
+                <div className="pb-1.5">
+                  <FormLabel>Password</FormLabel>
+                </div>
                 <FormControl>
                   <Input
                     {...field}
                     type="password"
-                    placeholder=""
-                    variant={!!errors.email ? "danger" : "default"}
+                    className="placeholder:text-xs placeholder:text-gray-300"
+                    placeholder="● ● ● ● ● ● ● ●"
+                    variant={!!errors.password ? "danger" : "default"}
                     disabled={isSubmitting}
                   />
                 </FormControl>
@@ -80,7 +86,15 @@ export function SignInForm() {
               </FormItem>
             )}
           />
-          <Button type="submit">Sing in</Button>
+          <Button type="submit" className="h-12 text-left">
+            <span className="flex-1">Continue</span>
+            <ArrowRight className="size-5" />
+          </Button>
+          <div>
+            <Button type="button" onClick={() => form.reset()}>
+              Reset form
+            </Button>
+          </div>
         </div>
       </form>
     </FormProvider>
