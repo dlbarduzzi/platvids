@@ -3,7 +3,7 @@
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ArrowRight, CircleHelp } from "lucide-react"
+import { ArrowRight, Check, Circle, CircleHelp } from "lucide-react"
 
 import {
   FormControl,
@@ -13,6 +13,12 @@ import {
   FormMessage,
   FormProvider,
 } from "@/components/ui/form"
+
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card"
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -88,6 +94,7 @@ export function SignUpForm() {
   })
 
   const { errors, isSubmitting } = form.formState
+  const passwordValue = form.watch("password")
 
   function onSubmit(values: SignUpSchema) {
     console.log(values)
@@ -125,7 +132,45 @@ export function SignUpForm() {
               <FormItem>
                 <div className="flex items-center justify-between gap-x-2 pb-1.5 pr-1">
                   <FormLabel>Password</FormLabel>
-                  <CircleHelp className="size-4 text-gray-500" />
+                  <HoverCard openDelay={300}>
+                    <HoverCardTrigger>
+                      <CircleHelp className="size-4 text-gray-500" />
+                    </HoverCardTrigger>
+                    <HoverCardContent align="end" side="top" className="w-80">
+                      <div>
+                        <div className="text-sm font-semibold text-black">
+                          Password Requirements
+                        </div>
+                        <div className="pt-1 text-xs text-gray-600">
+                          Your password must meet the following criteria:
+                        </div>
+                        <div className="pt-5">
+                          <ul className="space-y-1 text-sm text-black">
+                            <PasswordCheck
+                              isValid={passwordValue.length >= PASSWORD_MIN_CHARS}
+                              description="At least 8 characters long"
+                            />
+                            <PasswordCheck
+                              isValid={passwordHasLowercaseLetter(passwordValue)}
+                              description="Contain lowercase letter"
+                            />
+                            <PasswordCheck
+                              isValid={passwordHasUppercaseLetter(passwordValue)}
+                              description="Contain uppercase letter"
+                            />
+                            <PasswordCheck
+                              isValid={passwordHasNumber(passwordValue)}
+                              description="Contain a number"
+                            />
+                            <PasswordCheck
+                              isValid={passwordHasSpecialChar(passwordValue)}
+                              description="Contain a special character"
+                            />
+                          </ul>
+                        </div>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
                 </div>
                 <FormControl>
                   <Input
@@ -153,5 +198,25 @@ export function SignUpForm() {
         </div>
       </form>
     </FormProvider>
+  )
+}
+
+type PasswordCheckProps = {
+  isValid: boolean
+  description: string
+}
+
+function PasswordCheck({ isValid, description }: PasswordCheckProps) {
+  return (
+    <li className="inline-flex items-center gap-x-2">
+      <span className="flex size-5 items-center justify-center">
+        {isValid ? (
+          <Check className="size-5 text-green-500" />
+        ) : (
+          <Circle className="size-3 h-full fill-gray-300 stroke-none" />
+        )}
+      </span>
+      {description}
+    </li>
   )
 }
