@@ -153,9 +153,9 @@ export function SignUpForm() {
                         <div className="pt-5">
                           <ul className="space-y-1">
                             <PasswordCheck
-                              isValid={passwordValue.length >= PASSWORD_MIN_CHARS}
+                              isValid={passwordHasNumber(passwordValue)}
                               isFormError={!!errors.password}
-                              description="At least 8 characters long"
+                              description="Contain a number"
                             />
                             <PasswordCheck
                               isValid={passwordHasLowercaseLetter(passwordValue)}
@@ -168,14 +168,18 @@ export function SignUpForm() {
                               description="Contain uppercase letter"
                             />
                             <PasswordCheck
-                              isValid={passwordHasNumber(passwordValue)}
-                              isFormError={!!errors.password}
-                              description="Contain a number"
-                            />
-                            <PasswordCheck
                               isValid={passwordHasSpecialChar(passwordValue)}
                               isFormError={!!errors.password}
                               description="Contain a special character"
+                            />
+                            <PasswordCheck
+                              isValid={
+                                passwordValue.length >= PASSWORD_MIN_CHARS &&
+                                passwordValue.length <= PASSWORD_MAX_CHARS
+                              }
+                              isFormError={!!errors.password}
+                              description={`Between ${PASSWORD_MIN_CHARS} and
+                              ${PASSWORD_MAX_CHARS} characters long`}
                             />
                           </ul>
                         </div>
