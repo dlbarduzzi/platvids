@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils"
 
 import { signIn } from "../_actions/signin"
 import { signInSchema } from "../_schemas/signin"
+import { LoadingSpinner } from "@/components/loading-spinner"
 
 export function SignInForm() {
   const [showPassword, setShowPassword] = useState(false)
@@ -108,7 +109,11 @@ export function SignInForm() {
           />
           <Button type="submit" disabled={isSubmitting} className="h-12 text-left">
             <span className="flex-1">Continue</span>
-            <ArrowRight className="size-5" />
+            {isSubmitting ? (
+              <LoadingSpinner size="xs" />
+            ) : (
+              <ArrowRight className="size-5" />
+            )}
           </Button>
           <div>
             <Button

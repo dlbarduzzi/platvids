@@ -40,6 +40,7 @@ import {
 } from "../_schemas/signup"
 
 import { signUp } from "../_actions/signup"
+import { LoadingSpinner } from "@/components/loading-spinner"
 
 import { cn } from "@/lib/utils"
 
@@ -184,7 +185,11 @@ export function SignUpForm() {
           />
           <Button type="submit" disabled={isSubmitting} className="h-12 text-left">
             <span className="flex-1">Create an account</span>
-            <ArrowRight className="size-5" />
+            {isSubmitting ? (
+              <LoadingSpinner size="xs" />
+            ) : (
+              <ArrowRight className="size-5" />
+            )}
           </Button>
           <div>
             <Button
