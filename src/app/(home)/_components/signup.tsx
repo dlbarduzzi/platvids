@@ -1,10 +1,20 @@
 "use client"
 
-import { z } from "zod"
+import type { SignUpSchema } from "../_schemas/signup"
+
 import { useForm } from "react-hook-form"
 import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ArrowRight, Check, Circle, CircleHelp, X as IconX } from "lucide-react"
+
+import {
+  ArrowRight,
+  Check,
+  Circle,
+  CircleHelp,
+  Eye,
+  EyeOff,
+  X as IconX,
+} from "lucide-react"
 
 import {
   FormControl,
@@ -19,71 +29,23 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
+import {
+  signUpSchema,
+  passwordHasNumber,
+  passwordHasSpecialChar,
+  passwordHasLowercaseLetter,
+  passwordHasUppercaseLetter,
+  PASSWORD_MIN_CHARS,
+  PASSWORD_MAX_CHARS,
+} from "../_schemas/signup"
+
+import { signUp } from "../_actions/signup"
+
 import { cn } from "@/lib/utils"
-
-const PASSWORD_MIN_CHARS = 8
-const PASSWORD_MAX_CHARS = 72
-
-function passwordHasNumber(value: string) {
-  return /[0-9]/.test(value)
-}
-
-function passwordHasSpecialChar(value: string) {
-  return /[!?@#$&^*_\-=+]/.test(value)
-}
-
-function passwordHasLowercaseLetter(value: string) {
-  return /[a-z]/.test(value)
-}
-
-function passwordHasUppercaseLetter(value: string) {
-  return /[A-Z]/.test(value)
-}
-
-const signUpSchema = z
-  .object({
-    email: z.string().min(1, "Email is required").email("Not a valid email"),
-    password: z
-      .string()
-      .min(1, "Password is required")
-      .min(PASSWORD_MIN_CHARS, {
-        message: `Password must be at least ${PASSWORD_MIN_CHARS} characters long`,
-      })
-      .max(PASSWORD_MAX_CHARS, {
-        message: `Password must be at most ${PASSWORD_MAX_CHARS} characters long`,
-      }),
-  })
-  .superRefine((input, ctx) => {
-    const passwordCheck = { isValid: true, message: "" }
-    if (passwordCheck.isValid && !passwordHasNumber(input.password)) {
-      passwordCheck.isValid = false
-      passwordCheck.message = "Password must contain at least 1 number"
-    }
-    if (passwordCheck.isValid && !passwordHasLowercaseLetter(input.password)) {
-      passwordCheck.isValid = false
-      passwordCheck.message = "Password must contain at least 1 lowercase character"
-    }
-    if (passwordCheck.isValid && !passwordHasUppercaseLetter(input.password)) {
-      passwordCheck.isValid = false
-      passwordCheck.message = "Password must contain at least 1 uppercase character"
-    }
-    if (passwordCheck.isValid && !passwordHasSpecialChar(input.password)) {
-      passwordCheck.isValid = false
-      passwordCheck.message = "Password must contain at least 1 special character"
-    }
-    if (!passwordCheck.isValid) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["password"],
-        message: passwordCheck.message,
-      })
-    }
-  })
-
-type SignUpSchema = z.infer<typeof signUpSchema>
 
 export function SignUpForm() {
   const [openPopover, setOpenPopover] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const form = useForm<SignUpSchema>({
     resolver: zodResolver(signUpSchema),
@@ -96,8 +58,11 @@ export function SignUpForm() {
   const { errors, isSubmitting } = form.formState
   const passwordValue = form.watch("password")
 
-  function onSubmit(values: SignUpSchema) {
-    console.log(values)
+  async function onSubmit(values: SignUpSchema) {
+    setOpenPopover(() => false)
+    setShowPassword(() => false)
+    // TODO: Get response and handle it (error, success, etc...)
+    await signUp(values)
   }
 
   return (
@@ -187,29 +152,47 @@ export function SignUpForm() {
                     </PopoverContent>
                   </Popover>
                 </div>
-                <FormControl>
-                  <Input
-                    {...field}
-                    type="password"
-                    className="placeholder:text-xs placeholder:text-gray-300"
-                    placeholder="● ● ● ● ● ● ● ●"
-                    variant={!!errors.password ? "danger" : "default"}
-                    disabled={isSubmitting}
-                  />
-                </FormControl>
+                <div className="relative">
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type={showPassword ? "text" : "password"}
+                      // eslint-disable-next-line max-len
+                      className="pr-12 placeholder:text-[11px] placeholder:text-gray-300"
+                      placeholder="● ● ● ● ● ● ● ●"
+                      variant={!!errors.password ? "danger" : "default"}
+                      disabled={isSubmitting}
+                    />
+                  </FormControl>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <div
+                      role="button"
+                      onClick={() => setShowPassword(() => !showPassword)}
+                      className={cn(isSubmitting && "pointer-events-none")}
+                    >
+                      {showPassword ? (
+                        <Eye className="size-6 text-gray-400" />
+                      ) : (
+                        <EyeOff className="size-6 text-gray-400" />
+                      )}
+                    </div>
+                  </div>
+                </div>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <Button type="submit" className="h-12 text-left">
+          <Button type="submit" disabled={isSubmitting} className="h-12 text-left">
             <span className="flex-1">Create an account</span>
             <ArrowRight className="size-5" />
           </Button>
           <div>
             <Button
               type="button"
+              disabled={isSubmitting}
               onClick={() => {
                 setOpenPopover(() => false)
+                setShowPassword(() => false)
                 form.reset()
               }}
             >

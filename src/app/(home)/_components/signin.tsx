@@ -1,9 +1,11 @@
 "use client"
 
-import { z } from "zod"
+import type { SignInSchema } from "../_schemas/signin"
+
 import { useForm } from "react-hook-form"
-import { ArrowRight } from "lucide-react"
+import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { ArrowRight, Eye, EyeOff } from "lucide-react"
 
 import {
   FormControl,
@@ -17,14 +19,14 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
-const signInSchema = z.object({
-  email: z.string().email("Invalid email"),
-  password: z.string().min(1, { message: "Password is required" }),
-})
+import { cn } from "@/lib/utils"
 
-type SignInSchema = z.infer<typeof signInSchema>
+import { signIn } from "../_actions/signin"
+import { signInSchema } from "../_schemas/signin"
 
 export function SignInForm() {
+  const [showPassword, setShowPassword] = useState(false)
+
   const form = useForm<SignInSchema>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
@@ -35,8 +37,10 @@ export function SignInForm() {
 
   const { errors, isSubmitting } = form.formState
 
-  function onSubmit(values: SignInSchema) {
-    console.log(values)
+  async function onSubmit(values: SignInSchema) {
+    setShowPassword(() => false)
+    // TODO: Get response and handle it (error, success, etc...)
+    await signIn(values)
   }
 
   return (
@@ -72,26 +76,49 @@ export function SignInForm() {
                 <div className="pb-1.5">
                   <FormLabel>Password</FormLabel>
                 </div>
-                <FormControl>
-                  <Input
-                    {...field}
-                    type="password"
-                    className="placeholder:text-xs placeholder:text-gray-300"
-                    placeholder="● ● ● ● ● ● ● ●"
-                    variant={!!errors.password ? "danger" : "default"}
-                    disabled={isSubmitting}
-                  />
-                </FormControl>
+                <div className="relative">
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type={showPassword ? "text" : "password"}
+                      // eslint-disable-next-line max-len
+                      className="pr-12 placeholder:text-[11px] placeholder:text-gray-300"
+                      placeholder="● ● ● ● ● ● ● ●"
+                      variant={!!errors.password ? "danger" : "default"}
+                      disabled={isSubmitting}
+                    />
+                  </FormControl>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <div
+                      role="button"
+                      onClick={() => setShowPassword(() => !showPassword)}
+                      className={cn(isSubmitting && "pointer-events-none")}
+                    >
+                      {showPassword ? (
+                        <Eye className="size-6 text-gray-400" />
+                      ) : (
+                        <EyeOff className="size-6 text-gray-400" />
+                      )}
+                    </div>
+                  </div>
+                </div>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <Button type="submit" className="h-12 text-left">
+          <Button type="submit" disabled={isSubmitting} className="h-12 text-left">
             <span className="flex-1">Continue</span>
             <ArrowRight className="size-5" />
           </Button>
           <div>
-            <Button type="button" onClick={() => form.reset()}>
+            <Button
+              type="button"
+              disabled={isSubmitting}
+              onClick={() => {
+                setShowPassword(() => false)
+                form.reset()
+              }}
+            >
               Reset form
             </Button>
           </div>
