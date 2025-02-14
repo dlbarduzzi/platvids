@@ -2,8 +2,9 @@
 
 import { z } from "zod"
 import { useForm } from "react-hook-form"
+import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ArrowRight, Check, Circle, CircleHelp } from "lucide-react"
+import { ArrowRight, Check, Circle, CircleHelp, X as IconX } from "lucide-react"
 
 import {
   FormControl,
@@ -14,14 +15,11 @@ import {
   FormProvider,
 } from "@/components/ui/form"
 
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card"
-
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+
+import { cn } from "@/lib/utils"
 
 const PASSWORD_MIN_CHARS = 8
 const PASSWORD_MAX_CHARS = 72
@@ -85,6 +83,8 @@ const signUpSchema = z
 type SignUpSchema = z.infer<typeof signUpSchema>
 
 export function SignUpForm() {
+  const [openPopover, setOpenPopover] = useState(false)
+
   const form = useForm<SignUpSchema>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
@@ -132,11 +132,17 @@ export function SignUpForm() {
               <FormItem>
                 <div className="flex items-center justify-between gap-x-2 pb-1.5 pr-1">
                   <FormLabel>Password</FormLabel>
-                  <HoverCard openDelay={300}>
-                    <HoverCardTrigger>
+                  <Popover open={openPopover} onOpenChange={setOpenPopover}>
+                    <PopoverTrigger>
                       <CircleHelp className="size-4 text-gray-500" />
-                    </HoverCardTrigger>
-                    <HoverCardContent align="end" side="top" className="w-80">
+                    </PopoverTrigger>
+                    <PopoverContent
+                      align="end"
+                      side="top"
+                      className="w-80"
+                      onFocusOutside={e => e.preventDefault()}
+                      onPointerDownOutside={e => e.preventDefault()}
+                    >
                       <div>
                         <div className="text-sm font-semibold text-black">
                           Password Requirements
@@ -145,32 +151,37 @@ export function SignUpForm() {
                           Your password must meet the following criteria:
                         </div>
                         <div className="pt-5">
-                          <ul className="space-y-1 text-sm text-black">
+                          <ul className="space-y-1">
                             <PasswordCheck
                               isValid={passwordValue.length >= PASSWORD_MIN_CHARS}
+                              isFormError={!!errors.password}
                               description="At least 8 characters long"
                             />
                             <PasswordCheck
                               isValid={passwordHasLowercaseLetter(passwordValue)}
+                              isFormError={!!errors.password}
                               description="Contain lowercase letter"
                             />
                             <PasswordCheck
                               isValid={passwordHasUppercaseLetter(passwordValue)}
+                              isFormError={!!errors.password}
                               description="Contain uppercase letter"
                             />
                             <PasswordCheck
                               isValid={passwordHasNumber(passwordValue)}
+                              isFormError={!!errors.password}
                               description="Contain a number"
                             />
                             <PasswordCheck
                               isValid={passwordHasSpecialChar(passwordValue)}
+                              isFormError={!!errors.password}
                               description="Contain a special character"
                             />
                           </ul>
                         </div>
                       </div>
-                    </HoverCardContent>
-                  </HoverCard>
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <FormControl>
                   <Input
@@ -191,7 +202,13 @@ export function SignUpForm() {
             <ArrowRight className="size-5" />
           </Button>
           <div>
-            <Button type="button" onClick={() => form.reset()}>
+            <Button
+              type="button"
+              onClick={() => {
+                setOpenPopover(() => false)
+                form.reset()
+              }}
+            >
               Reset form
             </Button>
           </div>
@@ -203,15 +220,23 @@ export function SignUpForm() {
 
 type PasswordCheckProps = {
   isValid: boolean
+  isFormError: boolean
   description: string
 }
 
-function PasswordCheck({ isValid, description }: PasswordCheckProps) {
+function PasswordCheck({ isValid, isFormError, description }: PasswordCheckProps) {
   return (
-    <li className="inline-flex items-center gap-x-2">
+    <li
+      className={cn(
+        "inline-flex items-center gap-x-2 text-sm",
+        !isValid && isFormError ? "text-red-500" : "text-black"
+      )}
+    >
       <span className="flex size-5 items-center justify-center">
         {isValid ? (
           <Check className="size-5 text-green-500" />
+        ) : isFormError ? (
+          <IconX className="size-5 h-full text-red-500" />
         ) : (
           <Circle className="size-3 h-full fill-gray-300 stroke-none" />
         )}
