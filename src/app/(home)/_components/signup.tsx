@@ -1,6 +1,6 @@
 "use client"
 
-import type { SignUpSchema } from "../_schemas/signup"
+import type { SignUpSchema } from "@/features/auth/schemas/signup"
 
 import { useForm } from "react-hook-form"
 import { useState } from "react"
@@ -27,6 +27,7 @@ import {
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { LoadingSpinner } from "@/components/loading-spinner"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 import {
@@ -37,12 +38,10 @@ import {
   passwordHasUppercaseLetter,
   PASSWORD_MIN_CHARS,
   PASSWORD_MAX_CHARS,
-} from "../_schemas/signup"
-
-import { signUp } from "../_actions/signup"
-import { LoadingSpinner } from "@/components/loading-spinner"
+} from "@/features/auth/schemas/signup"
 
 import { cn } from "@/lib/utils"
+import { signUp } from "@/features/auth/actions/signup"
 
 export function SignUpForm() {
   const [openPopover, setOpenPopover] = useState(false)

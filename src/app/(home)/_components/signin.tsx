@@ -1,6 +1,6 @@
 "use client"
 
-import type { SignInSchema } from "../_schemas/signin"
+import type { SignInSchema } from "@/features/auth/schemas/signin"
 
 import { useForm } from "react-hook-form"
 import { useState } from "react"
@@ -18,12 +18,12 @@ import {
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { LoadingSpinner } from "@/components/loading-spinner"
 
 import { cn } from "@/lib/utils"
 
-import { signIn } from "../_actions/signin"
-import { signInSchema } from "../_schemas/signin"
-import { LoadingSpinner } from "@/components/loading-spinner"
+import { signIn } from "@/features/auth/actions/signin"
+import { signInSchema } from "@/features/auth/schemas/signin"
 
 export function SignInForm() {
   const [showPassword, setShowPassword] = useState(false)

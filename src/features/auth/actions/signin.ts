@@ -1,10 +1,11 @@
 "use server"
 
-import type { SignInSchema } from "../_schemas/signin"
+import type { SignInSchema } from "@/features/auth/schemas/signin"
 
 import { delay } from "@/lib/utils"
-import { signInSchema } from "../_schemas/signin"
+import { signInSchema } from "@/features/auth/schemas/signin"
 
+// TODO: NOT READY. THIS IS JUST A SAMPLE
 export async function signIn(data: SignInSchema) {
   try {
     await delay(2000)
