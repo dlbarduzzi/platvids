@@ -2,6 +2,8 @@
 
 import type { SignInSchema } from "@/features/auth/schemas/signin"
 
+import Link from "next/link"
+
 import { useForm } from "react-hook-form"
 import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -46,7 +48,7 @@ export function SignInForm() {
 
   return (
     <FormProvider {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="mt-10">
+      <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="grid grid-cols-1 gap-y-8">
           <FormField
             name="email"
@@ -115,17 +117,16 @@ export function SignInForm() {
               <ArrowRight className="size-5" />
             )}
           </Button>
-          <div>
-            <Button
-              type="button"
-              disabled={isSubmitting}
-              onClick={() => {
-                setShowPassword(() => false)
-                form.reset()
-              }}
+          <div className="text-center text-sm">
+            {"Don't have an account? "}
+            <Link
+              href="/sign-up"
+              className={cn(
+                "font-medium text-black hover:underline hover:underline-offset-4"
+              )}
             >
-              Reset form
-            </Button>
+              Sign up
+            </Link>
           </div>
         </div>
       </form>

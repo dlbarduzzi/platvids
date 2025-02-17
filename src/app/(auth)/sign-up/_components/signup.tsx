@@ -2,6 +2,8 @@
 
 import type { SignUpSchema } from "@/features/auth/schemas/signup"
 
+import Link from "next/link"
+
 import { useForm } from "react-hook-form"
 import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -67,7 +69,7 @@ export function SignUpForm() {
 
   return (
     <FormProvider {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="mt-10">
+      <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="grid grid-cols-1 gap-y-8">
           <FormField
             name="email"
@@ -95,7 +97,11 @@ export function SignUpForm() {
             control={form.control}
             render={({ field }) => (
               <FormItem>
-                <div className="flex items-center justify-between gap-x-2 pb-1.5 pr-1">
+                <div
+                  className={cn(
+                    "flex items-center justify-between gap-x-2 pb-2.5 pr-1 pt-1"
+                  )}
+                >
                   <FormLabel>Password</FormLabel>
                   <Popover open={openPopover} onOpenChange={setOpenPopover}>
                     <PopoverTrigger>
@@ -183,25 +189,23 @@ export function SignUpForm() {
             )}
           />
           <Button type="submit" disabled={isSubmitting} className="h-12 text-left">
-            <span className="flex-1">Create an account</span>
+            <span className="flex-1">Create account</span>
             {isSubmitting ? (
               <LoadingSpinner size="xs" />
             ) : (
               <ArrowRight className="size-5" />
             )}
           </Button>
-          <div>
-            <Button
-              type="button"
-              disabled={isSubmitting}
-              onClick={() => {
-                setOpenPopover(() => false)
-                setShowPassword(() => false)
-                form.reset()
-              }}
+          <div className="text-center text-sm">
+            Already have an account?{" "}
+            <Link
+              href="/sign-in"
+              className={cn(
+                "font-medium text-black hover:underline hover:underline-offset-4"
+              )}
             >
-              Reset form
-            </Button>
+              Sign in
+            </Link>
           </div>
         </div>
       </form>
