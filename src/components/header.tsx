@@ -25,7 +25,7 @@ export function Header() {
           </div>
           <div className="flex items-center">
             <Button asChild>
-              <Link href="/login">Sign in</Link>
+              <Link href="/sign-in">Sign in</Link>
             </Button>
           </div>
         </div>

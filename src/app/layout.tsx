@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import { siteConfig } from "@/lib/site"
 import { fontGeistSans, fontGeistMono } from "@/lib/fonts"
 
+import { Toaster } from "react-hot-toast"
 import { ScreenSize } from "@/components/screen-size"
 import { QueryProvider } from "@/providers/react-query"
 
@@ -47,6 +48,7 @@ export default function RootLayout({
         )}
       >
         <QueryProvider>{children}</QueryProvider>
+        <Toaster position="top-right" toastOptions={{ removeDelay: 100 }} />
         <ScreenSize />
       </body>
     </html>
