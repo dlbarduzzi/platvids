@@ -17,9 +17,9 @@ export function runTransaction<T>(
     database,
   }: {
     signal: AbortSignal
-    database: typeof db
+    database: typeof db | Transaction
   }
-) {
+): Promise<T> {
   return database.transaction(tx => {
     return new Promise((resolve, reject) => {
       if (signal.aborted) {
