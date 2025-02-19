@@ -21,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
+import { signUp } from "@/features/auth/actions/signup"
 import { signUpSchema } from "@/features/auth/schemas/signup"
 
 export function SignUpForm() {
@@ -34,8 +35,9 @@ export function SignUpForm() {
 
   const { errors } = form.formState
 
-  function onSubmit(values: SignUpSchema) {
-    console.log(values)
+  async function onSubmit(values: SignUpSchema) {
+    const resp = await signUp(values)
+    console.log(resp)
   }
 
   return (
