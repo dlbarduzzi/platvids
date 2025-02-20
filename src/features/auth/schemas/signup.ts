@@ -33,28 +33,32 @@ export const signUpSchema = z
       }),
   })
   .superRefine((input, ctx) => {
-    const passwordCheck = { isValid: true, message: "" }
-    if (passwordCheck.isValid && !passwordHasNumber(input.password)) {
-      passwordCheck.isValid = false
-      passwordCheck.message = "Password must contain at least 1 number"
-    }
-    if (passwordCheck.isValid && !passwordHasLowercaseLetter(input.password)) {
-      passwordCheck.isValid = false
-      passwordCheck.message = "Password must contain at least 1 lowercase character"
-    }
-    if (passwordCheck.isValid && !passwordHasUppercaseLetter(input.password)) {
-      passwordCheck.isValid = false
-      passwordCheck.message = "Password must contain at least 1 uppercase character"
-    }
-    if (passwordCheck.isValid && !passwordHasSpecialChar(input.password)) {
-      passwordCheck.isValid = false
-      passwordCheck.message = "Password must contain at least 1 special character"
-    }
-    if (!passwordCheck.isValid) {
+    if (!passwordHasNumber(input.password)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["password"],
-        message: passwordCheck.message,
+        message: "Password must contain at least 1 number",
+      })
+    }
+    if (!passwordHasLowercaseLetter(input.password)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["password"],
+        message: "Password must contain at least 1 lowercase character",
+      })
+    }
+    if (!passwordHasUppercaseLetter(input.password)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["password"],
+        message: "Password must contain at least 1 uppercase character",
+      })
+    }
+    if (!passwordHasSpecialChar(input.password)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["password"],
+        message: "Password must contain at least 1 special character",
       })
     }
   })
