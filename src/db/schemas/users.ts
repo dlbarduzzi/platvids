@@ -7,9 +7,6 @@ import {
   boolean,
 } from "drizzle-orm/pg-core"
 
-import { z } from "zod"
-import { createSelectSchema } from "drizzle-zod"
-
 import { lower } from "@/db/utils"
 
 export const users = pgTable(
@@ -30,6 +27,3 @@ export const users = pgTable(
   },
   table => [uniqueIndex("email_index").on(lower(table.email))]
 )
-
-export const userSchema = createSelectSchema(users)
-export type UserSchema = z.infer<typeof userSchema>
