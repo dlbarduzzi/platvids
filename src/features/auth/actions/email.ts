@@ -57,11 +57,14 @@ export async function sendEmail({
   }
 }
 
-export async function sendEmailVerification(email: string) {
+export async function sendEmailVerification(email: string, token: string) {
   return await sendEmail({
     from: clientEnv.NEXT_PUBLIC_APP_EMAIL_ONBOARDING,
     email,
     subject: "Confirm your email address",
-    template: EmailTemplate({ email }),
+    template: EmailTemplate({
+      // eslint-disable-next-line max-len
+      confirmEmailLink: `${clientEnv.NEXT_PUBLIC_APP_URL}/email-verification?token=${token}`,
+    }),
   })
 }

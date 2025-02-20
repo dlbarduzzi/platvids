@@ -83,7 +83,7 @@ export async function signUp(data: SignUpSchema): Promise<SignUpResponse> {
     // We are not checking for error or email sent confirmation. We should
     // probably handle that and keep track of the email id that was sent.
     // This email id comes from the resend response.
-    await sendEmailVerification(data.email)
+    await sendEmailVerification(data.email, newToken.token)
 
     return { ok: true, email: newUser.email, token: newToken.token }
   } catch (error) {
