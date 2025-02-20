@@ -5,6 +5,7 @@ export const env = createEnv({
   server: {
     NODE_ENV: z.enum(["development", "production"]),
     DATABASE_URL: z.string().url(),
+    RESEND_API_KEY: z.string().min(1),
     DB_MIGRATING: z
       .string()
       .refine(s => s === "true" || s === "false")
@@ -21,6 +22,7 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     DATABASE_URL: process.env.DATABASE_URL,
     DB_MIGRATING: process.env.DB_MIGRATING,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
     /* eslint-enable n/no-process-env */
   },
   emptyStringAsUndefined: true,

@@ -5,6 +5,7 @@ export const env = createEnv({
   client: {
     NEXT_PUBLIC_APP_URL: z.string().url(),
     NEXT_PUBLIC_APP_EMAIL_SUPPORT: z.string().email(),
+    NEXT_PUBLIC_APP_EMAIL_ONBOARDING: z.string().email(),
   },
   onValidationError: issues => {
     console.error("❌ Invalid client environment variables ❌", issues)
@@ -15,6 +16,7 @@ export const env = createEnv({
     /* eslint-disable n/no-process-env */
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_APP_EMAIL_SUPPORT: process.env.NEXT_PUBLIC_APP_EMAIL_SUPPORT,
+    NEXT_PUBLIC_APP_EMAIL_ONBOARDING: process.env.NEXT_PUBLIC_APP_EMAIL_ONBOARDING,
     /* eslint-enable n/no-process-env */
   },
   emptyStringAsUndefined: true,

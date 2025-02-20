@@ -8,27 +8,25 @@ import { z } from "zod"
 
 import { createToken } from "@/features/auth/actions/tokens"
 import { signUpSchema } from "@/features/auth/schemas/signup"
+import { sendEmailVerification } from "@/features/auth/actions/email"
 import { createUser, findUserByEmail } from "@/features/auth/actions/users"
 
-const ERR_DUPLICATE_RECORD = "error/duplicate-record"
-const ERR_UNDEFINED_RECORD = "error/undefined-record"
-const ERR_SCHEMA_VALIDATION = "error/schema-validation"
-const ERR_INTERNAL_EXCEPTION = "error/internal-exception"
+import * as errs from "@/features/constants"
 
 type FieldErrors = z.inferFlattenedErrors<typeof signUpSchema>
 
 type SignUpResponse =
   | {
       ok: false
-      error: typeof ERR_SCHEMA_VALIDATION
+      error: typeof errs.ERR_SCHEMA_VALIDATION
       fields: FieldErrors["fieldErrors"]
     }
   | {
       ok: false
       error:
-        | typeof ERR_DUPLICATE_RECORD
-        | typeof ERR_UNDEFINED_RECORD
-        | typeof ERR_INTERNAL_EXCEPTION
+        | typeof errs.ERR_DUPLICATE_RECORD
+        | typeof errs.ERR_UNDEFINED_RECORD
+        | typeof errs.ERR_INTERNAL_EXCEPTION
       message: string
     }
   | {
@@ -50,7 +48,7 @@ export async function signUp(data: SignUpSchema): Promise<SignUpResponse> {
     if (!dataParsed.success) {
       return {
         ok: false,
-        error: ERR_SCHEMA_VALIDATION,
+        error: errs.ERR_SCHEMA_VALIDATION,
         fields: dataParsed.error.flatten().fieldErrors,
       }
     }
@@ -59,7 +57,7 @@ export async function signUp(data: SignUpSchema): Promise<SignUpResponse> {
     if (user != null) {
       return {
         ok: false,
-        error: ERR_DUPLICATE_RECORD,
+        error: errs.ERR_DUPLICATE_RECORD,
         message: "This email is already registered.",
       }
     }
@@ -68,7 +66,7 @@ export async function signUp(data: SignUpSchema): Promise<SignUpResponse> {
     if (newUser == null) {
       return {
         ok: false,
-        error: ERR_UNDEFINED_RECORD,
+        error: errs.ERR_UNDEFINED_RECORD,
         message: "Request failed to create new user.",
       }
     }
@@ -77,10 +75,15 @@ export async function signUp(data: SignUpSchema): Promise<SignUpResponse> {
     if (newToken == null) {
       return {
         ok: false,
-        error: ERR_UNDEFINED_RECORD,
+        error: errs.ERR_UNDEFINED_RECORD,
         message: "Request failed to create new token.",
       }
     }
+
+    // We are not checking for error or email sent confirmation. We should
+    // probably handle that and keep track of the email id that was sent.
+    // This email id comes from the resend response.
+    await sendEmailVerification(data.email)
 
     return { ok: true, email: newUser.email, token: newToken.token }
   } catch (error) {
@@ -93,7 +96,7 @@ export async function signUp(data: SignUpSchema): Promise<SignUpResponse> {
     }
     return {
       ok: false,
-      error: ERR_INTERNAL_EXCEPTION,
+      error: errs.ERR_INTERNAL_EXCEPTION,
       message: "An internal error occurred while processing your request.",
     }
   }
