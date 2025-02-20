@@ -2,19 +2,16 @@
 
 import type { SignUpSchema } from "@/features/auth/schemas/signup"
 
-import bcrypt from "bcryptjs"
 import postgres from "postgres"
 
 import { z } from "zod"
 
-import { db } from "@/db/connect"
-import { users } from "@/db/schemas/users"
-import { passwords } from "@/db/schemas/passwords"
-
+import { createToken } from "@/features/auth/actions/tokens"
 import { signUpSchema } from "@/features/auth/schemas/signup"
-import { findUserByEmail } from "@/features/auth/actions/users"
+import { createUser, findUserByEmail } from "@/features/auth/actions/users"
 
 const ERR_DUPLICATE_RECORD = "error/duplicate-record"
+const ERR_UNDEFINED_RECORD = "error/undefined-record"
 const ERR_SCHEMA_VALIDATION = "error/schema-validation"
 const ERR_INTERNAL_EXCEPTION = "error/internal-exception"
 
@@ -28,17 +25,16 @@ type SignUpResponse =
     }
   | {
       ok: false
-      error: typeof ERR_DUPLICATE_RECORD
-      message: string
-    }
-  | {
-      ok: false
-      error: typeof ERR_INTERNAL_EXCEPTION
+      error:
+        | typeof ERR_DUPLICATE_RECORD
+        | typeof ERR_UNDEFINED_RECORD
+        | typeof ERR_INTERNAL_EXCEPTION
       message: string
     }
   | {
       ok: true
-      user: { id: string; email: string }
+      email: string
+      token: string
     }
 
 export async function signUp(data: SignUpSchema): Promise<SignUpResponse> {
@@ -68,41 +64,25 @@ export async function signUp(data: SignUpSchema): Promise<SignUpResponse> {
       }
     }
 
-    const userResult = await db.transaction(async tx => {
-      const [newUser] = await tx
-        .insert(users)
-        .values({ email: data.email })
-        .returning({ id: users.id, email: users.email })
-
-      if (newUser == null) {
-        tx.rollback()
-        return
-      }
-
-      const passwordHash = await bcrypt.hash(data.password, 12)
-
-      const [newPasswordHash] = await tx
-        .insert(passwords)
-        .values({ userId: newUser.id, passwordHash })
-        .returning({ passwordHash: passwords.passwordHash })
-
-      if (newPasswordHash == null) {
-        tx.rollback()
-        return
-      }
-
-      return newUser
-    })
-
-    if (userResult == null) {
+    const newUser = await createUser(data.email, data.password)
+    if (newUser == null) {
       return {
         ok: false,
-        error: ERR_INTERNAL_EXCEPTION,
-        message: "An internal error occurred while processing your request.",
+        error: ERR_UNDEFINED_RECORD,
+        message: "Request failed to create new user.",
       }
     }
 
-    return { ok: true, user: userResult }
+    const newToken = await createToken(data.email)
+    if (newToken == null) {
+      return {
+        ok: false,
+        error: ERR_UNDEFINED_RECORD,
+        message: "Request failed to create new token.",
+      }
+    }
+
+    return { ok: true, email: newUser.email, token: newToken.token }
   } catch (error) {
     if (error instanceof postgres.PostgresError) {
       // Only log error message to prevent leaking data.
