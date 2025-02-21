@@ -3,7 +3,7 @@
 import type { JSX } from "react"
 
 import { Resend } from "resend"
-import { EmailTemplate } from "@/components/email-template"
+import { EmailVerification } from "@/components/email-verification"
 
 import { env as serverEnv } from "@/env/server"
 import { env as clientEnv } from "@/env/client"
@@ -62,9 +62,10 @@ export async function sendEmailVerification(email: string, token: string) {
     from: clientEnv.NEXT_PUBLIC_APP_EMAIL_ONBOARDING,
     email,
     subject: "Confirm your email address",
-    template: EmailTemplate({
+    template: EmailVerification({
+      username: email.split("@")[0] ?? email,
       // eslint-disable-next-line max-len
-      confirmEmailLink: `${clientEnv.NEXT_PUBLIC_APP_URL}/email-verification?token=${token}`,
+      verificationLink: `${clientEnv.NEXT_PUBLIC_APP_URL}/email-verification?token=${token}`,
     }),
   })
 }

@@ -36,13 +36,6 @@ type SignUpResponse =
     }
 
 export async function signUp(data: SignUpSchema): Promise<SignUpResponse> {
-  // TODO:
-  // DONE - 1. parse data and validate fields
-  // DONE - 2. check if email already exists
-  // DONE - 3. create user with hashed password
-  // 4. send email verification
-  // DO NOT create database session or cookie session.
-  // This will be done only upon email verification.
   try {
     const dataParsed = signUpSchema.safeParse(data)
     if (!dataParsed.success) {

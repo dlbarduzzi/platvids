@@ -1,6 +1,6 @@
 import Link from "next/link"
+import Image from "next/image"
 
-import { Logo } from "@/components/logo"
 import { Button } from "@/components/ui/button"
 import { Container } from "@/components/container"
 
@@ -15,11 +15,17 @@ export function Header() {
             <Link
               href="/"
               className={cn(
-                "rounded-[1px] focus-visible:outline-none focus-visible:ring-2",
+                "rounded-full focus-visible:outline-none focus-visible:ring-2",
                 "focus-visible:ring-black focus-visible:ring-offset-2"
               )}
             >
-              <Logo />
+              <Image
+                src="/images/logo.png"
+                alt="PlatVids logo"
+                width={500}
+                height={500}
+                className="size-11"
+              />
               <span className="sr-only">Link to home page.</span>
             </Link>
           </div>
