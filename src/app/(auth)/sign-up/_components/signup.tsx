@@ -21,6 +21,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
+import { cn } from "@/lib/utils"
+import { delay } from "@/lib/utils"
 import { signUp } from "@/features/auth/actions/signup"
 import { signUpSchema } from "@/features/auth/schemas/signup"
 
@@ -33,11 +35,16 @@ export function SignUpForm() {
     },
   })
 
-  const { errors } = form.formState
+  const { errors, isSubmitting } = form.formState
 
   async function onSubmit(values: SignUpSchema) {
-    const resp = await signUp(values)
-    console.log(resp)
+    if (1 > 2) {
+      const resp = await signUp(values)
+      console.log(resp)
+    } else {
+      await delay(2000)
+      console.log("Submitted!")
+    }
   }
 
   return (
@@ -62,6 +69,7 @@ export function SignUpForm() {
                           {...field}
                           type="text"
                           variant={!!errors.email ? "danger" : "default"}
+                          disabled={isSubmitting}
                           placeholder="jane.smith@email.com"
                         />
                       </FormControl>
@@ -82,6 +90,7 @@ export function SignUpForm() {
                           {...field}
                           type="password"
                           variant={!!errors.password ? "danger" : "default"}
+                          disabled={isSubmitting}
                           placeholder="Enter your password..."
                         />
                       </FormControl>
@@ -91,20 +100,58 @@ export function SignUpForm() {
                 )}
               />
               <div>
-                <Button type="submit" className="h-11 w-full">
+                <Button type="submit" className="h-11 w-full" disabled={isSubmitting}>
                   <span className="flex-1 text-left">Create Account</span>
                   <ArrowRight className="size-5" />
                 </Button>
+              </div>
+              <div
+                className={cn(
+                  "text-center text-xs",
+                  isSubmitting ? "text-gray-400" : "text-gray-700"
+                )}
+              >
+                <span className="block">By signing up, you agree to our</span>
+                <span className="block pt-1">
+                  <Link
+                    href="/general/terms-of-service"
+                    className={cn(
+                      "font-semibold hover:underline hover:underline-offset-4",
+                      isSubmitting ? "pointer-events-none text-gray-400" : "text-black"
+                    )}
+                  >
+                    Terms of Service
+                  </Link>
+                  {" and "}
+                  <Link
+                    href="/general/privacy-policy"
+                    className={cn(
+                      "font-semibold hover:underline hover:underline-offset-4",
+                      isSubmitting ? "pointer-events-none text-gray-400" : "text-black"
+                    )}
+                  >
+                    Privacy Policy
+                  </Link>
+                  .
+                </span>
               </div>
             </form>
           </FormProvider>
         </div>
         <div className="bg-gray-100 px-8 py-9">
-          <div className="space-x-1 text-center text-sm text-black">
+          <div
+            className={cn(
+              "space-x-1 text-center text-sm",
+              isSubmitting ? "pointer-events-none text-gray-400" : "text-black"
+            )}
+          >
             <span>Already have an account?</span>
             <Link
               href="/sign-in"
-              className="font-semibold hover:underline hover:underline-offset-4"
+              className={cn(
+                "font-semibold hover:underline hover:underline-offset-4",
+                isSubmitting && "pointer-events-none"
+              )}
             >
               Sign in
             </Link>
