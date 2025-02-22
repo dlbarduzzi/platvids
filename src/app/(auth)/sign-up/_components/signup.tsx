@@ -75,8 +75,8 @@ export function SignUpForm() {
 
   return (
     <div className="p-5">
-      <div className="max-w-sm border border-gray-200">
-        <div className="space-y-9 bg-white px-8 py-9">
+      <div className="max-w-[416px] border border-gray-200">
+        <div className="bg-white px-8 py-9">
           <div className="flex items-center justify-center">
             <Link
               href="/"
@@ -91,19 +91,19 @@ export function SignUpForm() {
                 alt="PlatVids logo"
                 width={500}
                 height={500}
-                className="size-11"
+                className="size-10"
               />
               <span className="sr-only">Link to home page.</span>
             </Link>
           </div>
-          <div className="text-center">
+          <div className="pt-6 text-center">
             <h3 className="font-bold tracking-tight text-black">Welcome to PlatVids</h3>
             <p className="text-sm text-gray-500">Create your account to get started.</p>
           </div>
           <FormProvider {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="grid grid-cols-1 gap-y-8 pt-2"
+              className="grid grid-cols-1 gap-y-6 pt-8"
             >
               <FormField
                 name="email"
@@ -202,7 +202,7 @@ export function SignUpForm() {
                   </FormItem>
                 )}
               />
-              <div>
+              <div className="pt-2">
                 <Button type="submit" className="h-11 w-full" disabled={isSubmitting}>
                   <span className="flex-1 text-left">Create Account</span>
                   <ArrowRight className="size-5" />
@@ -210,7 +210,7 @@ export function SignUpForm() {
               </div>
               <div
                 className={cn(
-                  "text-center text-xs",
+                  "pt-3 text-center text-xs",
                   isSubmitting ? "text-gray-400" : "text-gray-700"
                 )}
               >
@@ -241,7 +241,7 @@ export function SignUpForm() {
             </form>
           </FormProvider>
         </div>
-        <div className="bg-gray-100 px-8 py-9">
+        <div className="bg-gray-100 px-8 py-6">
           <div
             className={cn(
               "space-x-1 text-center text-sm",
