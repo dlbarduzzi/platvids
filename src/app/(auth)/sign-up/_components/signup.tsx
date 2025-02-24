@@ -4,10 +4,11 @@ import type { SignUpSchema } from "@/features/auth/schemas/signup"
 
 import Link from "next/link"
 import Image from "next/image"
+import toast from "react-hot-toast"
 
 import { useForm } from "react-hook-form"
-import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useState, useReducer } from "react"
 
 import {
   ArrowRight,
@@ -32,9 +33,10 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
-import { cn } from "@/lib/utils"
 import { signUp } from "@/features/auth/actions/signup"
+import { cn, delay } from "@/lib/utils"
 import { serverErrorToast } from "@/components/toasts"
+import { sendEmailVerification } from "@/features/auth/actions/email"
 
 import {
   signUpSchema,
@@ -46,9 +48,55 @@ import {
   PASSWORD_MAX_CHARS,
 } from "@/features/auth/schemas/signup"
 
+type PageState = {
+  step: "signup" | "verifyEmail"
+  user: { email: string; token: string }
+  email: { resending: boolean }
+}
+
+type SetPageState = {
+  type: "SET_PAGE_STATE"
+  payload: Partial<PageState>
+}
+
+type ClearPageState = {
+  type: "CLEAR_PAGE_STATE"
+}
+
+type PageAction = SetPageState | ClearPageState
+
+const initialPageState: PageState = {
+  step: "signup",
+  user: { email: "", token: "" },
+  email: { resending: false },
+}
+
+const pageStateReducer = (pageState: PageState, pageAction: PageAction): PageState => {
+  switch (pageAction.type) {
+    case "SET_PAGE_STATE":
+      return { ...pageState, ...pageAction.payload }
+    case "CLEAR_PAGE_STATE":
+      return initialPageState
+    default:
+      return pageState
+  }
+}
+
+function ViewState({ pageState }: { pageState: PageState }) {
+  return (
+    <div className="pb-9">
+      <div className="border p-4 text-sm">
+        <pre>{JSON.stringify(pageState, null, 2)}</pre>
+      </div>
+    </div>
+  )
+}
+
 export function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [showPasswordHelper, setShowPasswordHelper] = useState(false)
+
+  const [state, dispatch] = useReducer(pageStateReducer, initialPageState)
 
   const form = useForm<SignUpSchema>({
     resolver: zodResolver(signUpSchema),
@@ -89,14 +137,117 @@ export function SignUpForm() {
       return
     }
 
-    // TODO:
-    // 1. Reset form.
-    // 2. Redirect user to verify email page.
-    console.log("Success! User registered!")
+    dispatch({
+      type: "SET_PAGE_STATE",
+      payload: {
+        step: "verifyEmail",
+        user: {
+          email: resp.email,
+          token: resp.token,
+        },
+      },
+    })
+
+    await sendEmailVerification(resp.email, resp.token)
+
+    form.reset()
+  }
+
+  if (state.step === "verifyEmail") {
+    return (
+      <div className="p-5">
+        <ViewState pageState={state} />
+        <div>
+          <Button
+            type="button"
+            onClick={() =>
+              dispatch({ type: "SET_PAGE_STATE", payload: { step: "signup" } })
+            }
+          >
+            Back
+          </Button>
+          <Button type="button" onClick={() => dispatch({ type: "CLEAR_PAGE_STATE" })}>
+            Clear
+          </Button>
+        </div>
+        <div className="max-w-[416px] border border-gray-200">
+          <div className="bg-white px-8 py-9">
+            <div className="flex items-center justify-center">
+              <Link
+                href="/"
+                className={cn(
+                  "rounded-full focus-visible:outline-none focus-visible:ring-2",
+                  "focus-visible:ring-black focus-visible:ring-offset-2",
+                  (isSubmitting || state.email.resending) && "pointer-events-none"
+                )}
+              >
+                <Image
+                  src="/images/logo.png"
+                  alt="PlatVids logo"
+                  width={500}
+                  height={500}
+                  className="size-10"
+                />
+                <span className="sr-only">Link to home page.</span>
+              </Link>
+            </div>
+            <div className="pt-6 text-center">
+              <h3 className="font-bold tracking-tight text-black">Verify Your Email</h3>
+              <p className="pt-4 text-sm text-black">
+                We&apos;ve sent a verification email to your inbox. Please click the
+                link in the email to confirm your account.
+              </p>
+            </div>
+            <div className="pt-6 text-center">
+              <div className="text-sm text-gray-600">
+                Didn&apos;t receive the email? Check your spam folder or
+                <div className="pt-3">
+                  <Button
+                    type="button"
+                    disabled={state.email.resending}
+                    onClick={() => {
+                      dispatch({
+                        type: "SET_PAGE_STATE",
+                        payload: { email: { resending: true } },
+                      })
+                      toast.promise(
+                        async () => {
+                          await sendEmailVerification(
+                            state.user.email,
+                            state.user.token
+                          )
+                          await delay(2000)
+                          dispatch({
+                            type: "SET_PAGE_STATE",
+                            payload: { email: { resending: false } },
+                          })
+                        },
+                        {
+                          loading: "Sending email...",
+                          success: "Email sent!",
+                        }
+                      )
+                    }}
+                  >
+                    Click here to resend
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="p-5">
+      <ViewState pageState={state} />
+      <div>
+        <Button type="button" onClick={() => dispatch({ type: "CLEAR_PAGE_STATE" })}>
+          Clear
+        </Button>
+      </div>
       <div className="max-w-[416px] border border-gray-200">
         <div className="bg-white px-8 py-9">
           <div className="flex items-center justify-center">
