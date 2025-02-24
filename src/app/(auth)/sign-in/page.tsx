@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <div className="bg-white">
+    <div className="relative h-screen w-full overflow-hidden">
       <section aria-labelledby="signin-header">
         <h1 id="signin-header" className="sr-only">
           Sign In Page.
