@@ -33,8 +33,8 @@ import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 import { cn } from "@/lib/utils"
-import { delay } from "@/lib/utils"
 import { signUp } from "@/features/auth/actions/signup"
+import { serverErrorToast } from "@/components/toasts"
 
 import {
   signUpSchema,
@@ -64,13 +64,35 @@ export function SignUpForm() {
   async function onSubmit(values: SignUpSchema) {
     setShowPassword(() => false)
     setShowPasswordHelper(() => false)
-    if (1 > 2) {
-      const resp = await signUp(values)
-      console.log(resp)
-    } else {
-      await delay(2000)
-      console.log("Submitted!")
+
+    const resp = await signUp(values)
+
+    if (!resp.ok) {
+      switch (resp.error) {
+        case "error/schema-validation":
+          Object.entries(resp.fields).forEach(([field, message]) => {
+            if (message.length > 0) {
+              form.setError(field as keyof SignUpSchema, {
+                type: "server",
+                message: message[0],
+              })
+            }
+          })
+          serverErrorToast({ id: resp.error, message: "Schema validation failed." })
+          break
+        case "error/duplicate-record":
+          form.setError("email", { message: "This email is already registered" })
+          break
+        default:
+          serverErrorToast({ id: resp.error })
+      }
+      return
     }
+
+    // TODO:
+    // 1. Reset form.
+    // 2. Redirect user to verify email page.
+    console.log("Success! User registered!")
   }
 
   return (
