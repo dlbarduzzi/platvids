@@ -6,8 +6,9 @@ import NextLink from "next/link"
 import NextImage from "next/image"
 
 import { useForm } from "react-hook-form"
+import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { CircleHelp } from "lucide-react"
+import { CircleHelp, Eye, EyeOff } from "lucide-react"
 
 import {
   FormControl,
@@ -27,6 +28,8 @@ import { signInSchema } from "@/features/auth/schemas/signin"
 import { cn } from "@/lib/utils"
 
 export function SignIn() {
+  const [showPassword, setShowPassword] = useState(false)
+
   const { canvasRef } = useDrawParticles()
 
   const form = useForm<SignInSchema>({
@@ -115,7 +118,8 @@ export function SignIn() {
                               role="button"
                               className={cn(
                                 "flex items-center gap-x-1 text-sm text-gray-600",
-                                "hover:text-gray-800"
+                                "hover:text-gray-800",
+                                isSubmitting && "pointer-events-none"
                               )}
                             >
                               Forgot Password
@@ -123,23 +127,50 @@ export function SignIn() {
                             </span>
                           </div>
                         </div>
-                        <div className="mt-0.5">
+                        <div className="relative mt-0.5">
                           <FormControl>
                             <Input
                               {...field}
-                              type="password"
+                              type={showPassword ? "text" : "password"}
                               variant={!!errors.password ? "danger" : "default"}
                               disabled={isSubmitting}
                               placeholder="Enter your password..."
+                              className="pr-12"
                             />
                           </FormControl>
+                          <div
+                            className={cn(
+                              "absolute inset-y-0 right-0 flex items-center pr-3"
+                            )}
+                          >
+                            <div
+                              role="button"
+                              onClick={() => setShowPassword(() => !showPassword)}
+                              className={cn(
+                                isSubmitting
+                                  ? "pointer-events-none text-gray-300"
+                                  : "text-gray-400"
+                              )}
+                            >
+                              {showPassword ? (
+                                <Eye className="size-6" />
+                              ) : (
+                                <EyeOff className="size-6" />
+                              )}
+                            </div>
+                          </div>
                         </div>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                   <div>
-                    <Button type="submit" size="md" className="w-full">
+                    <Button
+                      type="submit"
+                      size="md"
+                      disabled={isSubmitting}
+                      className="w-full"
+                    >
                       Sign in
                     </Button>
                   </div>

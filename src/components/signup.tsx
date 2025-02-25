@@ -6,8 +6,9 @@ import NextLink from "next/link"
 import NextImage from "next/image"
 
 import { useForm } from "react-hook-form"
+import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Info } from "lucide-react"
+import { Eye, EyeOff, Info } from "lucide-react"
 
 import {
   FormControl,
@@ -27,6 +28,8 @@ import { signUpSchema } from "@/features/auth/schemas/signup"
 import { cn } from "@/lib/utils"
 
 export function SignUp() {
+  const [showPassword, setShowPassword] = useState(false)
+
   const { canvasRef } = useDrawParticles()
 
   const form = useForm<SignUpSchema>({
@@ -115,7 +118,8 @@ export function SignUp() {
                               role="button"
                               className={cn(
                                 "flex items-center gap-x-1 text-sm text-gray-600",
-                                "hover:text-gray-800"
+                                "hover:text-gray-800",
+                                isSubmitting && "pointer-events-none"
                               )}
                             >
                               Password Criteria
@@ -123,23 +127,50 @@ export function SignUp() {
                             </span>
                           </div>
                         </div>
-                        <div className="mt-0.5">
+                        <div className="relative mt-0.5">
                           <FormControl>
                             <Input
                               {...field}
-                              type="password"
+                              type={showPassword ? "text" : "password"}
                               variant={!!errors.password ? "danger" : "default"}
                               disabled={isSubmitting}
                               placeholder="Enter your password..."
+                              className="pr-12"
                             />
                           </FormControl>
+                          <div
+                            className={cn(
+                              "absolute inset-y-0 right-0 flex items-center pr-3"
+                            )}
+                          >
+                            <div
+                              role="button"
+                              onClick={() => setShowPassword(() => !showPassword)}
+                              className={cn(
+                                isSubmitting
+                                  ? "pointer-events-none text-gray-300"
+                                  : "text-gray-400"
+                              )}
+                            >
+                              {showPassword ? (
+                                <Eye className="size-6" />
+                              ) : (
+                                <EyeOff className="size-6" />
+                              )}
+                            </div>
+                          </div>
                         </div>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                   <div>
-                    <Button type="submit" size="md" className="w-full">
+                    <Button
+                      type="submit"
+                      size="md"
+                      disabled={isSubmitting}
+                      className="w-full"
+                    >
                       Create Account
                     </Button>
                   </div>
@@ -166,6 +197,36 @@ export function SignUp() {
               </NextLink>
             </div>
           </div>
+        </div>
+        <div
+          className={cn(
+            "mt-9 bg-white text-center text-xs",
+            isSubmitting ? "text-gray-400" : "text-gray-700"
+          )}
+        >
+          <span className="block">By signing up, you agree to our</span>
+          <span className="block pt-1">
+            <NextLink
+              href="/general/terms-of-service"
+              className={cn(
+                "font-semibold hover:underline hover:underline-offset-4",
+                isSubmitting ? "pointer-events-none text-gray-400" : "text-black"
+              )}
+            >
+              Terms of Service
+            </NextLink>
+            {" and "}
+            <NextLink
+              href="/general/privacy-policy"
+              className={cn(
+                "font-semibold hover:underline hover:underline-offset-4",
+                isSubmitting ? "pointer-events-none text-gray-400" : "text-black"
+              )}
+            >
+              Privacy Policy
+            </NextLink>
+            .
+          </span>
         </div>
       </div>
     </div>
