@@ -8,7 +8,7 @@ import NextImage from "next/image"
 import { useForm } from "react-hook-form"
 import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Eye, EyeOff, Info } from "lucide-react"
+import { Check, Circle, Eye, EyeOff, Info, X as IconX } from "lucide-react"
 
 import {
   FormControl,
@@ -21,14 +21,25 @@ import {
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 import { useDrawParticles } from "@/hooks/particles"
-import { signUpSchema } from "@/features/auth/schemas/signup"
+
+import {
+  signUpSchema,
+  passwordHasNumber,
+  passwordHasSpecialChar,
+  passwordHasLowercaseLetter,
+  passwordHasUppercaseLetter,
+  PASSWORD_MIN_CHARS,
+  PASSWORD_MAX_CHARS,
+} from "@/features/auth/schemas/signup"
 
 import { cn } from "@/lib/utils"
 
 export function SignUp() {
   const [showPassword, setShowPassword] = useState(false)
+  const [showPasswordCriteria, setShowPasswordCriteria] = useState(false)
 
   const { canvasRef } = useDrawParticles()
 
@@ -41,6 +52,7 @@ export function SignUp() {
   })
 
   const { errors, isSubmitting } = form.formState
+  const inputPassword = form.watch("password")
 
   async function onSubmit(data: SignUpSchema) {
     console.log(data)
@@ -114,17 +126,34 @@ export function SignUp() {
                         <div className="relative">
                           <FormLabel>Password</FormLabel>
                           <div className="absolute inset-y-0 right-1 flex items-center">
-                            <span
-                              role="button"
-                              className={cn(
-                                "flex items-center gap-x-1 text-sm text-gray-600",
-                                "hover:text-gray-800",
-                                isSubmitting && "pointer-events-none"
-                              )}
+                            <Popover
+                              open={showPasswordCriteria}
+                              onOpenChange={setShowPasswordCriteria}
                             >
-                              Password Criteria
-                              <Info className="size-4" />
-                            </span>
+                              <PopoverTrigger
+                                className={cn(
+                                  "flex items-center gap-x-1 text-sm",
+                                  isSubmitting
+                                    ? "pointer-events-none text-gray-400"
+                                    : "text-gray-600 hover:text-gray-800"
+                                )}
+                              >
+                                Password Criteria
+                                <Info className="size-4" />
+                              </PopoverTrigger>
+                              <PopoverContent
+                                side="top"
+                                align="end"
+                                className="w-80"
+                                onFocusOutside={e => e.preventDefault()}
+                                onPointerDownOutside={e => e.preventDefault()}
+                              >
+                                <PasswordCriteria
+                                  isError={!!errors.password}
+                                  inputPassword={inputPassword}
+                                />
+                              </PopoverContent>
+                            </Popover>
                           </div>
                         </div>
                         <div className="relative mt-0.5">
@@ -230,5 +259,82 @@ export function SignUp() {
         </div>
       </div>
     </div>
+  )
+}
+
+type PasswordCriteriaProps = {
+  isError: boolean
+  inputPassword: string
+}
+
+function PasswordCriteria({ isError, inputPassword }: PasswordCriteriaProps) {
+  return (
+    <div>
+      <div className="text-sm font-semibold text-black">Password Requirements</div>
+      <div className="pt-1 text-xs text-gray-600">
+        Your password must meet the following criteria:
+      </div>
+      <div className="pt-5">
+        <ul className="space-y-1">
+          <PasswordCheck
+            isValid={passwordHasNumber(inputPassword)}
+            isError={isError}
+            description="Contain a number"
+          />
+          <PasswordCheck
+            isValid={passwordHasLowercaseLetter(inputPassword)}
+            isError={isError}
+            description="Contain lowercase letter"
+          />
+          <PasswordCheck
+            isValid={passwordHasUppercaseLetter(inputPassword)}
+            isError={isError}
+            description="Contain uppercase letter"
+          />
+          <PasswordCheck
+            isValid={passwordHasSpecialChar(inputPassword)}
+            isError={isError}
+            description="Contain a special character"
+          />
+          <PasswordCheck
+            isValid={
+              inputPassword.length >= PASSWORD_MIN_CHARS &&
+              inputPassword.length <= PASSWORD_MAX_CHARS
+            }
+            isError={isError}
+            // eslint-disable-next-line max-len
+            description={`Between ${PASSWORD_MIN_CHARS} and ${PASSWORD_MAX_CHARS} characters long`}
+          />
+        </ul>
+      </div>
+    </div>
+  )
+}
+
+type PasswordCheckProps = {
+  isValid: boolean
+  isError: boolean
+  description: string
+}
+
+function PasswordCheck({ isValid, isError, description }: PasswordCheckProps) {
+  return (
+    <li
+      className={cn(
+        "inline-flex items-center gap-x-2 text-sm",
+        isValid ? "text-green-600" : isError ? "text-red-500" : "text-black"
+      )}
+    >
+      <span className="flex size-5 items-center justify-center">
+        {isValid ? (
+          <Check className="size-5 text-green-500" />
+        ) : isError ? (
+          <IconX className="size-5 h-full text-red-500" />
+        ) : (
+          <Circle className="size-3 h-full fill-gray-300 stroke-none" />
+        )}
+      </span>
+      {description}
+    </li>
   )
 }
