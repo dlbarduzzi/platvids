@@ -1,16 +1,47 @@
 "use client"
 
+import type { SignInSchema } from "@/features/auth/schemas/signin"
+
 import NextLink from "next/link"
 import NextImage from "next/image"
 
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { CircleHelp } from "lucide-react"
+
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormProvider,
+} from "@/components/ui/form"
+
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+
 import { useDrawParticles } from "@/hooks/particles"
+import { signInSchema } from "@/features/auth/schemas/signin"
 
 import { cn } from "@/lib/utils"
 
 export function SignIn() {
   const { canvasRef } = useDrawParticles()
 
-  const isSubmitting = false
+  const form = useForm<SignInSchema>({
+    resolver: zodResolver(signInSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  })
+
+  const { errors, isSubmitting } = form.formState
+
+  async function onSubmit(data: SignInSchema) {
+    console.log(data)
+  }
 
   return (
     <div className="flex h-full flex-row justify-center px-4">
@@ -44,6 +75,76 @@ export function SignIn() {
               <p className="text-sm text-gray-800">
                 Access your account and start exploring.
               </p>
+            </div>
+            <div className="pt-6">
+              <FormProvider {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="grid grid-cols-1 gap-y-6"
+                >
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <div className="mt-0.5">
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="text"
+                              variant={!!errors.email ? "danger" : "default"}
+                              disabled={isSubmitting}
+                              placeholder="brian.smith@email.com"
+                            />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="relative">
+                          <FormLabel>Password</FormLabel>
+                          <div className="absolute inset-y-0 right-1 flex items-center">
+                            <span
+                              role="button"
+                              className={cn(
+                                "flex items-center gap-x-1 text-sm text-gray-600",
+                                "hover:text-gray-800"
+                              )}
+                            >
+                              Forgot Password
+                              <CircleHelp className="size-4" />
+                            </span>
+                          </div>
+                        </div>
+                        <div className="mt-0.5">
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="password"
+                              variant={!!errors.password ? "danger" : "default"}
+                              disabled={isSubmitting}
+                              placeholder="Enter your password..."
+                            />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div>
+                    <Button type="submit" size="md" className="w-full">
+                      Sign in
+                    </Button>
+                  </div>
+                </form>
+              </FormProvider>
             </div>
           </div>
           <div className="bg-gray-50 px-9 py-6">
