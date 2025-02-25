@@ -23,9 +23,9 @@ export function useDrawParticles() {
         const x = Math.random() * canvas.width
         const y = Math.random() * canvas.height
 
-        const size = Math.random() * 2 + 0.1
+        const size = Math.random() * 2.5 + 0.1
 
-        context.fillStyle = "rgba(255, 255, 255, 0.5)"
+        context.fillStyle = "rgba(0, 0, 0, 0.5)"
         context.beginPath()
 
         context.arc(x, y, size, 0, Math.PI * 2)
