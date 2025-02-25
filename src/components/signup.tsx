@@ -1,13 +1,14 @@
 "use client"
 
+import type { RefObject } from "react"
 import type { SignUpSchema } from "@/features/auth/schemas/signup"
 
 import NextLink from "next/link"
 import NextImage from "next/image"
 
 import { useForm } from "react-hook-form"
-import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useReducer, useState } from "react"
 import { Check, Circle, Eye, EyeOff, Info, X as IconX } from "lucide-react"
 
 import {
@@ -23,7 +24,9 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
+import { signUp } from "@/features/auth/actions/signup"
 import { useDrawParticles } from "@/hooks/particles"
+import { sendEmailVerification } from "@/features/auth/actions/email"
 
 import {
   signUpSchema,
@@ -37,9 +40,43 @@ import {
 
 import { cn } from "@/lib/utils"
 
+type AccountState = {
+  email: string
+  token: string
+  isReady: boolean
+}
+
+const initialAccountState: AccountState = {
+  email: "",
+  token: "",
+  isReady: false,
+}
+
+type AccountAction =
+  | {
+      type: "RESET"
+    }
+  | {
+      type: "SET"
+      payload: Partial<AccountState>
+    }
+
+function accountReducer(state: AccountState, action: AccountAction): AccountState {
+  switch (action.type) {
+    case "SET":
+      return { ...state, ...action.payload }
+    case "RESET":
+      return initialAccountState
+    default:
+      return state
+  }
+}
+
 export function SignUp() {
   const [showPassword, setShowPassword] = useState(false)
   const [showPasswordCriteria, setShowPasswordCriteria] = useState(false)
+
+  const [account, updateAccount] = useReducer(accountReducer, initialAccountState)
 
   const { canvasRef } = useDrawParticles()
 
@@ -55,7 +92,28 @@ export function SignUp() {
   const inputPassword = form.watch("password")
 
   async function onSubmit(data: SignUpSchema) {
-    console.log(data)
+    setShowPassword(() => false)
+    setShowPasswordCriteria(() => false)
+
+    const resp = await signUp(data)
+
+    if (!resp.ok) {
+      console.log(resp)
+      return
+    }
+
+    await sendEmailVerification(resp.email, resp.token)
+
+    updateAccount({
+      type: "SET",
+      payload: { isReady: true, email: resp.email, token: resp.token },
+    })
+
+    form.reset()
+  }
+
+  if (account.isReady) {
+    return VerifyEmail({ email: account.email, token: account.token, canvasRef })
   }
 
   return (
@@ -336,5 +394,66 @@ function PasswordCheck({ isValid, isError, description }: PasswordCheckProps) {
       </span>
       {description}
     </li>
+  )
+}
+
+type VerifyEmailProps = {
+  email: string
+  token: string
+  canvasRef: RefObject<HTMLCanvasElement | null>
+}
+
+function VerifyEmail({ email, token, canvasRef }: VerifyEmailProps) {
+  return (
+    <div className="flex h-full flex-row justify-center px-4">
+      <canvas ref={canvasRef} className="absolute inset-0 size-full bg-white" />
+      <div className="z-10 w-full max-w-md overflow-hidden">
+        <div className="flex items-center justify-center py-10">
+          <NextLink
+            href="/"
+            className={cn(
+              "rounded-full focus-visible:outline-none focus-visible:ring-2",
+              "focus-visible:ring-black focus-visible:ring-offset-2"
+            )}
+          >
+            <NextImage
+              src="/images/logo.png"
+              alt="PlatVids"
+              width={500}
+              height={500}
+              className="h-10 w-auto"
+            />
+            <span className="sr-only">Link to home page.</span>
+          </NextLink>
+        </div>
+        <div className="w-full max-w-md border border-gray-200 bg-white shadow-lg">
+          <div className="px-9 py-10">
+            <div>
+              <h3 className="text-lg font-extrabold tracking-tight text-black">
+                Verify Your Email
+              </h3>
+              <p className="pt-4 text-sm text-gray-800">
+                We&apos;ve sent a verification email to your inbox. Please click the
+                link in the email to confirm your account.
+              </p>
+            </div>
+            <div className="pt-6">
+              <Button
+                type="button"
+                size="md"
+                className="w-full"
+                onClick={() => {
+                  console.log(
+                    `Sending email to ${email} and token ${token.slice(0, 4)}...`
+                  )
+                }}
+              >
+                Resend
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }

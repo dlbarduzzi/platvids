@@ -3,7 +3,7 @@
 import type { JSX } from "react"
 
 import { Resend } from "resend"
-import { EmailVerification } from "@/components/email-verification"
+import { EmailVerification } from "@/components/emails"
 
 import { env as serverEnv } from "@/env/server"
 import { env as clientEnv } from "@/env/client"

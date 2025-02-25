@@ -46,7 +46,7 @@ export function EmailVerification({
                 width="40"
                 height="37"
                 alt="PlatVids"
-                className="mx-auto my-0"
+                className="mx-auto my-0 h-11 w-auto"
               />
             </Section>
             <Heading
