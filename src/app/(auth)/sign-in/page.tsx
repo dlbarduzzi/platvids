@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 
-import { SignInForm } from "./_components/signin"
+import { SignIn } from "@/components/signin"
 
 export const metadata: Metadata = {
   title: "Sign in",
@@ -15,7 +15,7 @@ export default function Page() {
           Sign In Page.
         </h1>
       </section>
-      <SignInForm />
+      <SignIn />
     </div>
   )
 }
