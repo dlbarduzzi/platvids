@@ -51,7 +51,7 @@ type AccountState = {
 const initialAccountState: AccountState = {
   email: "",
   token: "",
-  isReady: true,
+  isReady: false,
   isSendingEmail: false,
 }
 
@@ -184,16 +184,23 @@ export function SignUp() {
                     })
                     toast.promise(
                       async () => {
-                        await sendEmailVerification(account.email, account.token)
+                        const resp = await sendEmailVerification(
+                          account.email,
+                          account.token
+                        )
                         await delay(1000)
                         updateAccount({
                           type: "SET",
                           payload: { isSendingEmail: false },
                         })
+                        if (!resp.ok) {
+                          throw new Error("Email failed to be sent!")
+                        }
                       },
                       {
                         loading: "Sending email...",
                         success: "Email sent!",
+                        error: "An error occurred while sending email!",
                       }
                     )
                   }}
