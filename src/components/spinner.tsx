@@ -5,7 +5,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { cva } from "class-variance-authority"
 
-const loadingSpinnerVariants = cva("shrink-0 animate-soft-spin rounded-full border-4", {
+const spinnerVariants = cva("shrink-0 animate-soft-spin rounded-full border-4", {
   variants: {
     variant: {
       default: "border-gray-300 border-t-gray-500",
@@ -22,14 +22,14 @@ const loadingSpinnerVariants = cva("shrink-0 animate-soft-spin rounded-full bord
   },
 })
 
-type LoadingSpinnerProps = React.HTMLAttributes<HTMLDivElement> &
-  VariantProps<typeof loadingSpinnerVariants>
+type SpinnerProps = React.HTMLAttributes<HTMLDivElement> &
+  VariantProps<typeof spinnerVariants>
 
-const LoadingSpinner = React.forwardRef<HTMLDivElement, LoadingSpinnerProps>(
+const Spinner = React.forwardRef<HTMLDivElement, SpinnerProps>(
   ({ className, variant, size, ...props }, ref) => {
     return (
       <div
-        className={cn(loadingSpinnerVariants({ variant, size, className }))}
+        className={cn(spinnerVariants({ variant, size, className }))}
         ref={ref}
         {...props}
       />
@@ -37,6 +37,6 @@ const LoadingSpinner = React.forwardRef<HTMLDivElement, LoadingSpinnerProps>(
   }
 )
 
-LoadingSpinner.displayName = "LoadingSpinner"
+Spinner.displayName = "Spinner"
 
-export { LoadingSpinner }
+export { Spinner }
